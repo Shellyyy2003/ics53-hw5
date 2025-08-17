@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     int clientfd = open_clientfd(argv[1], argv[2]);
     if (clientfd == -1) { printf("Failed to open server"); exit(1); }
 
-    while(printf(">")) { // Main Loop
+    while(printf("> ")) { // Main Loop
         fgets(cmd, sizeof(cmd), stdin);
         char *cmd_ptr = cmd;
         
@@ -54,18 +54,19 @@ int main(int argc, char **argv) {
         if (strcmp(arg[0], "list") == 0 && count == 1) {
             snprintf(buf, MAX_STRING, "%s\n", arg[0]);
             write(clientfd, buf, strlen(buf));
+            memset(buf, 0, sizeof(buf));
             read(clientfd, buf, MAX_STRING);
-            fputs(buf, stdout);
+            printf("%s", buf);
         } else if (strcmp(arg[0], "price") == 0 && count == 3) {
             snprintf(buf, MAX_STRING, "%s %s %s\n", arg[0], arg[1], arg[2]);
             write(clientfd, buf, strlen(buf));
+            memset(buf, 0, sizeof(buf));
             read(clientfd, buf, MAX_STRING);
-            fputs(buf, stdout);
+            printf("%s", buf);
         } else if (strcmp(arg[0], "changePrice") == 0 && count == 4) {
             snprintf(buf, MAX_STRING, "%s %s %s %s\n", arg[0], arg[1], arg[2], arg[3]);
             write(clientfd, buf, strlen(buf));
-            read(clientfd, buf, MAX_STRING);
-            fputs(buf, stdout);
+            read(clientfd, buf, MAX_STRING); // Trash
         } else if (strcmp(arg[0], "quit") == 0 && count == 1) {
             snprintf(buf, MAX_STRING, "%s\n", arg[0]);
             write(clientfd, buf, strlen(buf));
