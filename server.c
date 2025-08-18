@@ -235,9 +235,9 @@ static int read_line(int fd, char *out, size_t cap) {
     while (1) {
         char c;
         ssize_t r = recv(fd, &c, 1, 0);
-        if (r == 0) { // EOF
-            if (n==0) return 0;
-            out[n]=0; return (int)n;
+        if (r == 0) {
+            if (n == 0) return -2;
+            out[n] = 0; return (int)n;
         }
         if (r < 0) {
             if (errno==EINTR) continue;
@@ -282,7 +282,7 @@ static void handle_price(int fd, const StockDB *db, const char *arg) {
     // read SYMBOL (until comma or space/comma)
     char *sym = p;
     while (*p && *p!=',' && *p!='\r' && *p!='\n') p++;
-    if (*p!=',' && *p!=',') { send_invalid(fd); return; } // guard if weird char
+    if (*p!=',') { send_invalid(fd); return; } // guard if weird char
     // split
     if (*p!=',') { /* no-op */ }
     *p = 0; p++;
@@ -403,8 +403,9 @@ int main(int argc, char **argv) {
     char line[2048];
     while (1) {
         int n = read_line(cfd, line, sizeof(line));
+        if (n == -2) break;
         if (n < 0) die("recv");
-        if (n == 0) break; // client closed
+        if (n == 0) continue; 
         // print the raw command to server stdout (spec requirement)
         printf("%s\n", line);
         fflush(stdout);
